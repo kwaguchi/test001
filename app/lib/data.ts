@@ -10,6 +10,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { notFound } from 'next/navigation';
 
 export async function fetchRevenue() {
   // Add noStore() here prevent the response from being cached.
@@ -120,7 +121,7 @@ export async function fetchFilteredInvoices(
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
-
+    console.log("請求書のデータ", invoice); // Invoice is an empty array []
     return invoices.rows;
   } catch (error) {
     console.error('Database Error:', error);
