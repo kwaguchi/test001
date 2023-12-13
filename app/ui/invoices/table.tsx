@@ -14,6 +14,8 @@ export default async function InvoicesTable({
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
   return (
+    // ...
+    
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
@@ -112,6 +114,10 @@ export default async function InvoicesTable({
                       <UpdateInvoice id={invoice.id} />
                       <DeleteInvoice id={invoice.id} />
                     </div>
+                    <td className="flex justify-end gap-2 whitespace-nowrap px-6 py-4 text-sm">
+                      <UpdateInvoice id={invoice.id} />
+                      <DeleteInvoice id={invoice.id} />
+                     </td>  
                   </td>
                 </tr>
               ))}
