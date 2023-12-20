@@ -1,18 +1,37 @@
-import Link from 'next/link';
-import { FaceFrownIcon } from '@heroicons/react/24/outline';
+import Form from '@/app/ui/invoices/edit-form';
+import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
+import { fetchCustomers, fetchInvoiceById } from '@/app/lib/data';
+import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 
-export default function NotFound() {
+export const metadata: Metadata = {
+  title: 'Invoice Update',
+}
+
+export default async function Page({ params }: { params: { id: string } }) {
+  const id = params.id;
+  const [invoice, customers] = await Promise.all([
+    fetchInvoiceById(id),
+    fetchCustomers(),
+  ]);
+
+  if (!invoice) {
+    notFound();
+  }
+
   return (
-    <main className="flex h-full flex-col items-center justify-center gap-2">
-      <FaceFrownIcon className="w-10 text-gray-400" />
-      <h2 className="text-xl font-semibold">404 Not Found</h2>
-      <p>Could not find the requested invoice.</p>
-      <Link
-        href="/dashboard/invoices"
-        className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-400"
-      >
-        Go Back
-      </Link>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: 'Invoices', href: '/dashboard/invoices' },
+          {
+            label: 'Edit Invoice',
+            href: `/dashboard/invoices/${id}/edit`,
+            active: true,
+          },
+        ]}
+      />
+      <Form invoice={invoice} customers={customers} />
     </main>
   );
 }
