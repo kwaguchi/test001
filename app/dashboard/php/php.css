@@ -1,0 +1,24 @@
+/* ./app/dashboard/php/Page.module.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .heading {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .customerList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .customerItem {
+    margin-bottom: 24px;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 8px;
+  }
+  

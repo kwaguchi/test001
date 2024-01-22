@@ -1,36 +1,50 @@
+
 'use client';
-import { useState } from 'react';
+import { Customer1 } from '@/app/lib/definitions';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
-const MyPage = () => {
-  const [fetchedData, setFetchedData] = useState(null);
+const Home = () => {
+  const [data, setData] = useState<Customer1[]>([]);
 
-  const handleButtonClick = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/');
-      const data = await response.json();
-      setFetchedData(data);
-  
-      
-      console.log('取得したデータ:', data);
-    } catch (error) {
-      console.error('データの取得に失敗しました:', error);
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/');
+        const jsonData = await response.json();
+        setData(jsonData);
+      } catch (error) {
+        console.error('データの取得中にエラーが発生しました:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
-      <h1>My Page</h1>
-      <button onClick={handleButtonClick}>ボタン</button>
-
-      
-      {fetchedData && (
-        <div>
-          <h2>取得したデータ</h2>
-          <pre>{JSON.stringify(fetchedData, null, 2)}</pre>
-        </div>
-      )}
+      <h1>顧客データ</h1>
+      <ul>
+        {data.map((customerData) => (
+          <li key={customerData.Id}>
+            <p>ID: {customerData.Id}</p>
+            <p>名前: {customerData.Name}</p>
+            <p>メール: {customerData.Email}</p>
+            {customerData.Image_url  ? (
+              <Image
+                src={customerData.Image_url }
+                alt={`Image for ${customerData.Name}`}
+                width={100} 
+                height={100} 
+              />
+            ) : (
+              <p>画像なし</p>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default MyPage;
+export default Home;
