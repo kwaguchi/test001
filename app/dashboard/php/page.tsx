@@ -1,7 +1,7 @@
 
 'use client';
 import { Customer1 } from '@/app/lib/definitions';
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const Home = () => {
