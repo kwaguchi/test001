@@ -5,7 +5,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return(
     <>
-  <p>newbranch</p>
+    <p>newbranch</p>
   
 </>
 
