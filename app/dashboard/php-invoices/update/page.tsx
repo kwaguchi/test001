@@ -1,71 +1,90 @@
-
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Customer1 } from '@/app/lib/definitions';
+import { useSearchParams } from "next/navigation";
 import Link from 'next/link';
-import { Button } from '@/app/ui/button';
+import { Invoice1, Customer1 } from '@/app/lib/definitions';
 
-const CreateInvoice1 = () => {
-  const [selectedCustomer, setSelectedCustomer] = useState('');
-  const [amount, setAmount] = useState('');
-  const [status, setStatus] = useState('pending');
+const EditInvoice = () => {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+  console.log(id);
+
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+  const [status, setStatus] = useState<"pending" | "paid" | undefined>('pending');
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer1[]>([]);
+  const [invoiceData, setInvoiceData] = useState<Invoice1 | null>(null);
+
   const currentDate = new Date();
   const year = currentDate.getFullYear();
   const month = String(currentDate.getMonth() + 1).padStart(2, '0');
   const day = String(currentDate.getDate()).padStart(2, '0');
   const selectedCustomerId = customers.find(customer => customer.Name === selectedCustomer)?.Id;
-  const createdDate = `${year}-${month}-${day}`;
   const updatedStatus = status;
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/');
-        const jsonData = await response.json();
-        setCustomers(jsonData);
+        const customersResponse = await fetch('http://localhost:8000/');
+        if (customersResponse.ok) {
+          const customersData: Customer1[] = await customersResponse.json();
+          setCustomers(customersData);
+        } else {
+          console.error('顧客データの取得に失敗しました。');
+        }
+
+        const invoicesResponse = await fetch(`http://localhost:8000/custermer.php`);
+        if (invoicesResponse.ok) {
+          const allInvoices: Invoice1[] = await invoicesResponse.json();
+  
+          const selectedInvoice = allInvoices.find(invoice => invoice.Id === id);
+  
+          if (selectedInvoice) {
+            setInvoiceData(selectedInvoice);
+            setAmount(String(selectedInvoice.Amount));
+            setStatus(selectedInvoice.Status);
+            setSelectedCustomer(selectedInvoice.Customer_id);
+          } else {
+            console.error('指定されたIDの請求書データが見つかりません。');
+          }
+        } else {
+          console.error('請求書データの取得に失敗しました。');
+        }
       } catch (error) {
-        console.error('顧客データの取得中にエラーが発生しました:', error);
+        console.error('データの取得中にエラーが発生しました:', error);
       }
     };
 
-    fetchCustomers();
-  }, []);
+    fetchData();
+  }, [id]);
 
-  const handleCreateInvoice = async () => {
+  const handleEditInvoice = async () => {
     try {
       setLoading(true);
 
-      if (!selectedCustomer || !amount) {
-        console.error('顧客と金額は必須');
-        return;
-      }
+      const updatedInvoiceData = {
+        Id: id,
+        Amount: parseFloat(amount), 
+        Status: updatedStatus,
+        Customer_id: selectedCustomer,
+      };
 
-      const response = await fetch('http://localhost:8000/createInvoice.php', {
+      const response = await fetch('http://localhost:8000/updateInvoice.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
-        body: JSON.stringify({
-          Customer_id: selectedCustomerId,
-          amount,
-          createdDate,
-          status: updatedStatus,
-        }),
+        body: JSON.stringify(updatedInvoiceData),
       });
 
       if (response.ok) {
-        console.log('請求書が正常に作成されました！');
-        setSelectedCustomer('');
-        setAmount('');
-        setStatus('pending');
+        console.log('請求書が更新されました。');
       } else {
-        console.error('請求書の作成に失敗しました。サーバーがエラーを返しました。');
+        console.error('請求書の更新に失敗しました。');
       }
     } catch (error) {
-      console.error('請求書の作成中にエラーが発生しました:', error);
+      console.error('請求書の更新中にエラーが発生しました:', error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +92,7 @@ const CreateInvoice1 = () => {
 
   return (
     <div className="container">
-      <h1>新しい請求書を作成する</h1>
+      <h1>請求書を編集する</h1>
       <label>
         顧客名:
         <select
@@ -83,7 +102,7 @@ const CreateInvoice1 = () => {
         >
           <option value="" disabled>顧客を選択</option>
           {customers.map((customer) => (
-            <option key={customer.Id} value={customer.Name}>
+            <option key={customer.Id} value={customer.Id}>
               {customer.Name}
             </option>
           ))}
@@ -129,12 +148,11 @@ const CreateInvoice1 = () => {
           </div>
         </Link>
         <Link href="/dashboard/php-invoices">
-          <div className="submitButton" onClick={handleCreateInvoice}>
-            Create Invoice
-          </div>
+        <div className="submitButton" onClick={handleEditInvoice}>
+          Edit Invoice
+        </div>
         </Link>
       </div>
-
       <style jsx>{`
         .container {
           max-width: 400px;
@@ -168,4 +186,4 @@ const CreateInvoice1 = () => {
   );
 };
 
-export default CreateInvoice1;
+export default EditInvoice;

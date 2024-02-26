@@ -1,10 +1,15 @@
 'use client';
 import { Invoice1, Customer1 } from '@/app/lib/definitions';
-
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router'; // useRouter をインポート
 import styled from 'styled-components';
 import Image from 'next/image';
 import { CreateInvoice1, DeleteInvoice1 } from '@/app/ui/invoices/buttons';
+import Link from 'next/link';
+
+type ItemType = {
+  Id: string;
+};
 
 const Container = styled.div`
   max-width: 800px;
@@ -77,9 +82,9 @@ const Home = () => {
 
         const sanitizedData = mergedData.map(item => ({
           ...item,
-          Customer_id: String(item.Customer_id || ''),
-          Amount: item.Amount || 0,
-          Date: item.Date || '',
+          "Customer_id": String(item.Customer_id || ''),
+          "Amount": item.Amount || 0,
+          "Date": item.Date || '',
         }));
 
         setData(sanitizedData);
@@ -94,6 +99,24 @@ const Home = () => {
   const filteredData = data
     .filter((item) => item.Amount > 0)
     .filter((item) => item.Name.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+
+  const handleDeleteInvoice = async (item: ItemType) => {
+    try {
+      const response = await fetch(`http://localhost:8000/deleteInvoice.php?id=${item.Id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const updatedData = data.filter((invoice) => invoice.Id !== item.Id);
+        setData(updatedData);
+      } else {
+        console.error('請求書の削除に失敗しました。');
+      }
+    } catch (error) {
+      console.error('削除中にエラーが発生しました:', error);
+    }
+  };
 
   return (
     <Container>
@@ -136,8 +159,12 @@ const Home = () => {
               <td>{item.Date}</td>
               <td>{item.Status}</td>
               <td>
-                <button onClick={() => handleDelete(item.Customer_id)}>Edit</button>
-                <DeleteInvoice1/>
+                <Link href={`/dashboard/php-invoices/update?id=${item.Id}`}>
+                  <div className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200">
+                    編集
+                  </div>
+                </Link>              
+                <button onClick={() => handleDeleteInvoice(item)}>Delete</button>
               </td>
             </tr>
           ))}
