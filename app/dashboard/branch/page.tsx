@@ -1,9 +1,13 @@
-import React from 'react';
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+  title: 'branch',
+}
+export default function Page() {
+  return(
+    <>
+  <p>newbranch</p>
+  
+</>
 
-const NewBranch = () => {
-    return (
-        <h1>Branch</h1>
-    );
-};
-
-export default NewBranch;
+  ) 
+}
